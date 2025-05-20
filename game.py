@@ -38,7 +38,9 @@ class Player(pygame.sprite.Sprite):
         self.vel_y = 0
         self.health = 100
 
-    def update(self, keys_pressed):
+    def update(self, keys_pressed=None):
+        if keys_pressed is None:
+            keys_pressed = pygame.key.get_pressed()
         if keys_pressed[pygame.K_LEFT]:
             self.rect.x -= PLAYER_SPEED
         if keys_pressed[pygame.K_RIGHT]:
@@ -67,7 +69,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.bottom = y
         self.direction = 1
 
-    def update(self):
+    def update(self, *args):
         self.rect.x += ENEMY_SPEED * self.direction
         if self.rect.left <= 0 or self.rect.right >= WIDTH:
             self.direction *= -1
