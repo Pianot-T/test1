@@ -3,6 +3,7 @@ import random
 
 # Screen dimensions
 WIDTH, HEIGHT = 800, 600
+WORLD_WIDTH = 1600
 FPS = 60
 
 # Colors
@@ -11,6 +12,8 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 GREEN = (0, 255, 0)
+SKY_TOP = (135, 206, 250)
+SKY_BOTTOM = (0, 120, 255)
 
 # Player settings
 PLAYER_WIDTH = 40
@@ -32,13 +35,21 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.Surface((PLAYER_WIDTH, PLAYER_HEIGHT))
         self.image.fill(GREEN)
+        # draw a simple face as a placeholder texture
+        eye = pygame.Surface((8, 8))
+        eye.fill(WHITE)
+        self.image.blit(eye, (10, 15))
+        self.image.blit(eye, (PLAYER_WIDTH - 18, 15))
+        pygame.draw.rect(self.image, BLACK, (8, PLAYER_HEIGHT - 15, PLAYER_WIDTH - 16, 5))
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH // 2
         self.rect.bottom = HEIGHT - 50
         self.vel_y = 0
         self.health = 100
 
-    def update(self, keys_pressed):
+    def update(self, keys_pressed=None):
+        if keys_pressed is None:
+            keys_pressed = pygame.key.get_pressed()
         if keys_pressed[pygame.K_LEFT]:
             self.rect.x -= PLAYER_SPEED
         if keys_pressed[pygame.K_RIGHT]:
@@ -54,22 +65,25 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = HEIGHT - 50
             self.vel_y = 0
 
-        self.rect.left = max(self.rect.left, 0)
-        self.rect.right = min(self.rect.right, WIDTH)
-
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.image = pygame.Surface((ENEMY_WIDTH, ENEMY_HEIGHT))
         self.image.fill(RED)
+        # simple texture: eyes and mouth
+        eye = pygame.Surface((6, 6))
+        eye.fill(WHITE)
+        self.image.blit(eye, (8, 10))
+        self.image.blit(eye, (ENEMY_WIDTH - 14, 10))
+        pygame.draw.rect(self.image, BLACK, (5, ENEMY_HEIGHT - 15, ENEMY_WIDTH - 10, 5))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.bottom = y
         self.direction = 1
 
-    def update(self):
+    def update(self, *args):
         self.rect.x += ENEMY_SPEED * self.direction
-        if self.rect.left <= 0 or self.rect.right >= WIDTH:
+        if self.rect.left <= 0 or self.rect.right >= WORLD_WIDTH:
             self.direction *= -1
 
 class Coin(pygame.sprite.Sprite):
@@ -93,6 +107,14 @@ class Game:
         self.coins = pygame.sprite.Group()
         self.score = 0
         self.player = Player()
+        self.camera_x = 0
+        self.background = pygame.Surface((WIDTH, HEIGHT))
+        for y in range(HEIGHT):
+            ratio = y / HEIGHT
+            r = int(SKY_TOP[0] + (SKY_BOTTOM[0] - SKY_TOP[0]) * ratio)
+            g = int(SKY_TOP[1] + (SKY_BOTTOM[1] - SKY_TOP[1]) * ratio)
+            b = int(SKY_TOP[2] + (SKY_BOTTOM[2] - SKY_TOP[2]) * ratio)
+            pygame.draw.line(self.background, (r, g, b), (0, y), (WIDTH, y))
 
     def reset_game(self):
         self.all_sprites.empty()
@@ -100,12 +122,13 @@ class Game:
         self.coins.empty()
         self.score = 0
         self.player = Player()
+        self.camera_x = 0
         self.all_sprites.add(self.player)
         # create one enemy and one coin for demonstration
-        enemy = Enemy(random.randint(100, WIDTH - 100), HEIGHT - 50)
+        enemy = Enemy(random.randint(100, WORLD_WIDTH - 100), HEIGHT - 50)
         self.all_sprites.add(enemy)
         self.enemies.add(enemy)
-        coin = Coin(random.randint(50, WIDTH - 50), HEIGHT - 100)
+        coin = Coin(random.randint(50, WORLD_WIDTH - 50), HEIGHT - 100)
         self.all_sprites.add(coin)
         self.coins.add(coin)
 
@@ -131,7 +154,7 @@ class Game:
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
 
-            self.screen.fill(BLACK)
+            self.screen.blit(self.background, (0, 0))
             self.draw_text("Platformer", WIDTH // 2, HEIGHT // 3)
             self.draw_text("Press ENTER to Start", WIDTH // 2, HEIGHT // 2)
             self.draw_text("Press ESC to Quit", WIDTH // 2, HEIGHT // 2 + 40)
@@ -150,23 +173,29 @@ class Game:
                 break
 
             self.all_sprites.update(keys_pressed)
+            self.camera_x = self.player.rect.centerx - WIDTH // 2
 
             # collisions
-            if pygame.sprite.spritecollide(self.player, self.enemies, False):
-                self.player.health -= 1
-                if self.player.health <= 0:
-                    self.state = "menu"
-                    break
+            for enemy in pygame.sprite.spritecollide(self.player, self.enemies, False):
+                if self.player.vel_y > 0 and self.player.rect.bottom <= enemy.rect.top + 10:
+                    enemy.kill()
+                    self.player.vel_y = -JUMP_POWER // 2
+                else:
+                    self.player.health -= 1
+                    if self.player.health <= 0:
+                        self.state = "menu"
+                        break
 
             for coin in pygame.sprite.spritecollide(self.player, self.coins, True):
                 self.score += 1
 
-            self.screen.fill(BLACK)
-            self.all_sprites.draw(self.screen)
+            self.screen.blit(self.background, (0, 0))
+            for sprite in self.all_sprites:
+                self.screen.blit(sprite.image, sprite.rect.move(-self.camera_x, 0))
             self.draw_health_bar(10, 10, self.player.health)
             self.draw_text(f"Score: {self.score}", WIDTH - 80, 20)
             # ground
-            pygame.draw.rect(self.screen, WHITE, (0, HEIGHT - 40, WIDTH, 40))
+            pygame.draw.rect(self.screen, WHITE, (-self.camera_x, HEIGHT - 40, WORLD_WIDTH, 40))
             pygame.display.flip()
             self.clock.tick(FPS)
 
