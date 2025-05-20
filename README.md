@@ -6,7 +6,10 @@ This repository contains a small 2D platformer written with **pygame**. The game
 - A health bar that decreases on enemy collisions.
 - Moving enemies.
 - Yellow coins that increase the score when collected.
-- A basic 2D environment with a ground platform.
+- A basic 2D environment with a ground platform and a simple sky gradient.
+- Basic textures for the player and enemies.
+- Enemies can be defeated by jumping on them.
+- Scrolling camera that follows the player across a larger world.
 - A main menu where you can start the game or quit.
 
 ## Requirements
