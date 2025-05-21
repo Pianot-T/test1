@@ -41,7 +41,8 @@ Controls:
 ## Custom Player Skin
 
 You can create your own player appearance using `editeur.py`. Run the editor and
-draw a 32x32 pixel skin with the palette provided. Either press `S` or use the
+draw a skin at the exact player size (40x60 pixels). Each pixel in the editor is
+displayed as a 5x5 square to make drawing easier. Either press `S` or use the
 "Sauvegarder" button to save your skin to `player_skin.png`. When you start the
 game again, this image will be loaded and used for the player sprite.
 
