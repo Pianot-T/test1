@@ -63,9 +63,12 @@ class Player(pygame.sprite.Sprite):
         if keys_pressed[pygame.K_RIGHT]:
             self.rect.x += PLAYER_SPEED
 
-        self.vel_y += GRAVITY
+        # allow jumping when the player is standing on something before
+        # applying gravity so the jump input is not missed
         if keys_pressed[pygame.K_SPACE] and self.vel_y == 0:
             self.vel_y = -JUMP_POWER
+
+        self.vel_y += GRAVITY
 
         self.rect.y += self.vel_y
 
