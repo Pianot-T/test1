@@ -33,6 +33,10 @@ ENEMY_SPEED = 2
 # Coin settings
 COIN_RADIUS = 10
 
+# Platform settings
+PLATFORM_WIDTH = 120
+PLATFORM_HEIGHT = 20
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -60,7 +64,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.x += PLAYER_SPEED
 
         self.vel_y += GRAVITY
-        if keys_pressed[pygame.K_SPACE] and self.rect.bottom >= GROUND_Y:
+        if keys_pressed[pygame.K_SPACE] and self.vel_y == 0:
             self.vel_y = -JUMP_POWER
 
         self.rect.y += self.vel_y
@@ -98,6 +102,14 @@ class Coin(pygame.sprite.Sprite):
         pygame.draw.circle(self.image, YELLOW, (COIN_RADIUS, COIN_RADIUS), COIN_RADIUS)
         self.rect = self.image.get_rect(center=(x, y))
 
+
+class Platform(pygame.sprite.Sprite):
+    def __init__(self, x, y, width=PLATFORM_WIDTH, height=PLATFORM_HEIGHT):
+        super().__init__()
+        self.image = pygame.Surface((width, height))
+        self.image.fill(WHITE)
+        self.rect = self.image.get_rect(topleft=(x, y))
+
 class Game:
     def __init__(self):
         pygame.init()
@@ -110,6 +122,7 @@ class Game:
         self.all_sprites = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.coins = pygame.sprite.Group()
+        self.platforms = pygame.sprite.Group()
         self.score = 0
         self.player = Player()
         self.camera_x = 0
@@ -125,6 +138,7 @@ class Game:
         self.all_sprites.empty()
         self.enemies.empty()
         self.coins.empty()
+        self.platforms.empty()
         self.score = 0
         self.player = Player()
         self.camera_x = 0
@@ -136,6 +150,10 @@ class Game:
         coin = Coin(random.randint(50, WORLD_WIDTH - 50), HEIGHT - 100)
         self.all_sprites.add(coin)
         self.coins.add(coin)
+        # add a platform the player can stand on
+        platform = Platform(WIDTH // 2 - PLATFORM_WIDTH // 2, GROUND_Y - 150)
+        self.all_sprites.add(platform)
+        self.platforms.add(platform)
 
     def draw_text(self, text, x, y, color=WHITE):
         img = self.font.render(text, True, color)
@@ -179,6 +197,17 @@ class Game:
 
             self.all_sprites.update(keys_pressed)
             self.camera_x = self.player.rect.centerx - WIDTH // 2
+
+            # platform collisions - allow crossing when not colliding
+            for platform in self.platforms:
+                if (
+                    self.player.rect.colliderect(platform.rect)
+                    and self.player.vel_y >= 0
+                    and self.player.rect.bottom - self.player.vel_y
+                    <= platform.rect.top
+                ):
+                    self.player.rect.bottom = platform.rect.top
+                    self.player.vel_y = 0
 
             # collisions
             for enemy in pygame.sprite.spritecollide(self.player, self.enemies, False):
