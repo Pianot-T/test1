@@ -1,14 +1,12 @@
 import pygame
 import os
 
-CELL_SIZE = 5
-GRID_WIDTH = 40
-GRID_HEIGHT = 60
-WIDTH = CELL_SIZE * GRID_WIDTH
-CANVAS_HEIGHT = CELL_SIZE * GRID_HEIGHT
+CELL_SIZE = 20
+GRID_SIZE = 32
+WIDTH = CELL_SIZE * GRID_SIZE
 PALETTE_SIZE = 40
 BUTTON_HEIGHT = 40
-HEIGHT = CANVAS_HEIGHT + PALETTE_SIZE + BUTTON_HEIGHT
+HEIGHT = WIDTH + PALETTE_SIZE + BUTTON_HEIGHT
 
 PALETTE_COLORS = [
     (0, 0, 0),
@@ -24,15 +22,15 @@ PALETTE_COLORS = [
 def load_existing_skin():
     if os.path.exists("player_skin.png"):
         image = pygame.image.load("player_skin.png").convert_alpha()
-        image = pygame.transform.scale(image, (GRID_WIDTH, GRID_HEIGHT))
+        image = pygame.transform.scale(image, (GRID_SIZE, GRID_SIZE))
         data = [
-            [image.get_at((x, y)) for x in range(GRID_WIDTH)]
-            for y in range(GRID_HEIGHT)
+            [image.get_at((x, y)) for x in range(GRID_SIZE)]
+            for y in range(GRID_SIZE)
         ]
         return data
     else:
         # default green skin
-        return [[(0, 255, 0) for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+        return [[(0, 255, 0) for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
 
 def main():
     pygame.init()
@@ -42,7 +40,7 @@ def main():
 
     grid = load_existing_skin()
     selected_color = PALETTE_COLORS[3]  # green
-    save_button = pygame.Rect(WIDTH // 2 - 60, CANVAS_HEIGHT + PALETTE_SIZE + 5, 120, BUTTON_HEIGHT - 10)
+    save_button = pygame.Rect(WIDTH // 2 - 60, WIDTH + PALETTE_SIZE + 5, 120, BUTTON_HEIGHT - 10)
 
     running = True
     while running:
@@ -54,20 +52,20 @@ def main():
                     running = False
                 if event.key == pygame.K_s:
                     # save skin
-                    surface = pygame.Surface((GRID_WIDTH, GRID_HEIGHT), pygame.SRCALPHA)
-                    for y in range(GRID_HEIGHT):
-                        for x in range(GRID_WIDTH):
+                    surface = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
+                    for y in range(GRID_SIZE):
+                        for x in range(GRID_SIZE):
                             surface.set_at((x, y), grid[y][x])
                     pygame.image.save(surface, "player_skin.png")
                     print("Skin sauvegarde dans player_skin.png")
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
-                if my < CANVAS_HEIGHT:
+                if my < WIDTH:
                     gx = mx // CELL_SIZE
                     gy = my // CELL_SIZE
-                    if 0 <= gx < GRID_WIDTH and 0 <= gy < GRID_HEIGHT:
+                    if 0 <= gx < GRID_SIZE and 0 <= gy < GRID_SIZE:
                         grid[gy][gx] = selected_color
-                elif my < CANVAS_HEIGHT + PALETTE_SIZE:
+                elif my < WIDTH + PALETTE_SIZE:
                     # palette selection
                     palette_width = PALETTE_SIZE * len(PALETTE_COLORS)
                     start_x = (WIDTH - palette_width) // 2
@@ -77,16 +75,16 @@ def main():
                             selected_color = PALETTE_COLORS[index]
                 else:
                     if save_button.collidepoint(mx, my):
-                        surface = pygame.Surface((GRID_WIDTH, GRID_HEIGHT), pygame.SRCALPHA)
-                        for y in range(GRID_HEIGHT):
-                            for x in range(GRID_WIDTH):
+                        surface = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
+                        for y in range(GRID_SIZE):
+                            for x in range(GRID_SIZE):
                                 surface.set_at((x, y), grid[y][x])
                         pygame.image.save(surface, "player_skin.png")
                         print("Skin sauvegarde dans player_skin.png")
 
         # draw grid
-        for y in range(GRID_HEIGHT):
-            for x in range(GRID_WIDTH):
+        for y in range(GRID_SIZE):
+            for x in range(GRID_SIZE):
                 rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
                 pygame.draw.rect(screen, grid[y][x], rect)
                 pygame.draw.rect(screen, (50, 50, 50), rect, 1)
@@ -94,7 +92,7 @@ def main():
         # draw palette
         start_x = (WIDTH - PALETTE_SIZE * len(PALETTE_COLORS)) // 2
         for i, color in enumerate(PALETTE_COLORS):
-            rect = pygame.Rect(start_x + i * PALETTE_SIZE, CANVAS_HEIGHT, PALETTE_SIZE, PALETTE_SIZE)
+            rect = pygame.Rect(start_x + i * PALETTE_SIZE, WIDTH, PALETTE_SIZE, PALETTE_SIZE)
             pygame.draw.rect(screen, color, rect)
             pygame.draw.rect(screen, (50, 50, 50), rect, 1)
             if color == selected_color:
