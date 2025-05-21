@@ -62,21 +62,65 @@ class Player(pygame.sprite.Sprite):
         self.health = 100
         self.on_ground = True
 
-    def update(self, keys_pressed=None):
+    def move(self, dx, dy, platforms):
+        """Move the player and resolve collisions."""
+        # Track previous position to allow one-way platform behaviour
+        prev_rect = self.rect.copy()
+
+        # Horizontal movement
+        self.rect.x += dx
+        for platform in platforms:
+            if self.rect.colliderect(platform.rect):
+                if dx > 0:
+                    self.rect.right = platform.rect.left
+                elif dx < 0:
+                    self.rect.left = platform.rect.right
+
+        # Keep player within world bounds horizontally
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.right > WORLD_WIDTH:
+            self.rect.right = WORLD_WIDTH
+
+        # Vertical movement
+        self.rect.y += dy
+        self.on_ground = False
+        if self.rect.bottom >= GROUND_Y:
+            self.rect.bottom = GROUND_Y
+            self.vel_y = 0
+            self.on_ground = True
+        for platform in platforms:
+            if self.rect.colliderect(platform.rect):
+                if dy > 0 and prev_rect.bottom <= platform.rect.top:
+                    # land on platform only when falling from above
+                    self.rect.bottom = platform.rect.top
+                    self.vel_y = 0
+                    self.on_ground = True
+                elif dy < 0 and prev_rect.top >= platform.rect.bottom:
+                    # hit the underside of a platform
+                    self.rect.top = platform.rect.bottom
+                    self.vel_y = 0
+
+    def update(self, keys_pressed=None, platforms=None):
         if keys_pressed is None:
             keys_pressed = pygame.key.get_pressed()
-        if keys_pressed[pygame.K_LEFT]:
-            self.rect.x -= PLAYER_SPEED
-        if keys_pressed[pygame.K_RIGHT]:
-            self.rect.x += PLAYER_SPEED
+        if platforms is None:
+            platforms = []
 
-        # allow jumping only when the player is on the ground
+        dx = 0
+        if keys_pressed[pygame.K_LEFT]:
+            dx -= PLAYER_SPEED
+        if keys_pressed[pygame.K_RIGHT]:
+            dx += PLAYER_SPEED
+
         if keys_pressed[pygame.K_SPACE] and self.on_ground:
             self.vel_y = -JUMP_POWER
             self.on_ground = False
 
         self.vel_y += GRAVITY
-        self.rect.y += self.vel_y
+        dy = self.vel_y
+
+        self.move(dx, dy, platforms)
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y=GROUND_Y):
@@ -200,26 +244,10 @@ class Game:
                 self.state = "menu"
                 break
 
-            self.all_sprites.update(keys_pressed)
-            self.player.on_ground = False
-            if self.player.rect.bottom >= GROUND_Y:
-                self.player.rect.bottom = GROUND_Y
-                self.player.vel_y = 0
-                self.player.on_ground = True
+            self.player.update(keys_pressed, self.platforms)
+            self.enemies.update()
 
             self.camera_x = self.player.rect.centerx - WIDTH // 2
-
-            # platform collisions - allow crossing when not colliding
-            for platform in self.platforms:
-                if (
-                    self.player.rect.colliderect(platform.rect)
-                    and self.player.vel_y >= 0
-                    and self.player.rect.bottom - self.player.vel_y
-                    <= platform.rect.top
-                ):
-                    self.player.rect.bottom = platform.rect.top
-                    self.player.vel_y = 0
-                    self.player.on_ground = True
 
             # collisions
             for enemy in pygame.sprite.spritecollide(self.player, self.enemies, False):
