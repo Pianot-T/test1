@@ -54,6 +54,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.bottom = GROUND_Y
         self.vel_y = 0
         self.health = 100
+        self.on_ground = True
 
     def update(self, keys_pressed=None):
         if keys_pressed is None:
@@ -63,15 +64,19 @@ class Player(pygame.sprite.Sprite):
         if keys_pressed[pygame.K_RIGHT]:
             self.rect.x += PLAYER_SPEED
 
-        self.vel_y += GRAVITY
-        if keys_pressed[pygame.K_SPACE] and self.vel_y == 0:
+        # allow jumping only once until touching the ground again
+        if keys_pressed[pygame.K_SPACE] and self.on_ground:
             self.vel_y = -JUMP_POWER
+            self.on_ground = False
+
+        self.vel_y += GRAVITY
 
         self.rect.y += self.vel_y
 
         if self.rect.bottom >= GROUND_Y:
             self.rect.bottom = GROUND_Y
             self.vel_y = 0
+            self.on_ground = True
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y=GROUND_Y):
@@ -199,6 +204,7 @@ class Game:
             self.camera_x = self.player.rect.centerx - WIDTH // 2
 
             # platform collisions - allow crossing when not colliding
+            self.player.on_ground = self.player.rect.bottom >= GROUND_Y
             for platform in self.platforms:
                 if (
                     self.player.rect.colliderect(platform.rect)
@@ -208,6 +214,7 @@ class Game:
                 ):
                     self.player.rect.bottom = platform.rect.top
                     self.player.vel_y = 0
+                    self.player.on_ground = True
 
             # collisions
             for enemy in pygame.sprite.spritecollide(self.player, self.enemies, False):
