@@ -2,8 +2,11 @@ import pygame
 import os
 
 CELL_SIZE = 16  # enlarge each cell for a bigger window
-GRID_WIDTH = 40
-GRID_HEIGHT = 60
+SCALE = 4
+GRID_WIDTH = 40 // SCALE
+GRID_HEIGHT = 60 // SCALE
+BASE_WIDTH = GRID_WIDTH * SCALE
+BASE_HEIGHT = GRID_HEIGHT * SCALE
 WIDTH = CELL_SIZE * GRID_WIDTH
 CANVAS_HEIGHT = CELL_SIZE * GRID_HEIGHT
 PALETTE_SIZE = 40
@@ -54,10 +57,13 @@ def main():
                     running = False
                 if event.key == pygame.K_s:
                     # save skin
-                    surface = pygame.Surface((GRID_WIDTH, GRID_HEIGHT), pygame.SRCALPHA)
+                    surface = pygame.Surface((BASE_WIDTH, BASE_HEIGHT), pygame.SRCALPHA)
                     for y in range(GRID_HEIGHT):
                         for x in range(GRID_WIDTH):
-                            surface.set_at((x, y), grid[y][x])
+                            color = grid[y][x]
+                            for dy in range(SCALE):
+                                for dx in range(SCALE):
+                                    surface.set_at((x * SCALE + dx, y * SCALE + dy), color)
                     pygame.image.save(surface, "player_skin.png")
                     print("Skin sauvegarde dans player_skin.png")
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -77,10 +83,13 @@ def main():
                             selected_color = PALETTE_COLORS[index]
                 else:
                     if save_button.collidepoint(mx, my):
-                        surface = pygame.Surface((GRID_WIDTH, GRID_HEIGHT), pygame.SRCALPHA)
+                        surface = pygame.Surface((BASE_WIDTH, BASE_HEIGHT), pygame.SRCALPHA)
                         for y in range(GRID_HEIGHT):
                             for x in range(GRID_WIDTH):
-                                surface.set_at((x, y), grid[y][x])
+                                color = grid[y][x]
+                                for dy in range(SCALE):
+                                    for dx in range(SCALE):
+                                        surface.set_at((x * SCALE + dx, y * SCALE + dy), color)
                         pygame.image.save(surface, "player_skin.png")
                         print("Skin sauvegarde dans player_skin.png")
 
