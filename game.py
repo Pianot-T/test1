@@ -73,11 +73,7 @@ class Player(pygame.sprite.Sprite):
                 elif dx < 0:
                     self.rect.left = platform.rect.right
 
-        # Keep player within world bounds horizontally
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > WORLD_WIDTH:
-            self.rect.right = WORLD_WIDTH
+        # Allow the player to move freely without horizontal world boundaries
 
         # Vertical movement
         self.rect.y += dy
