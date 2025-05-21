@@ -1,9 +1,4 @@
-le personnage a le droit de sauter q'une seul fois il peut a nouveau sauter que lorsque il est de nouveau en collision avec le sol
-
-le personnage doit traverser lorsque il n'est plus en collision avec le sol
-
-toutes le contour du personnage a un hitbox de collision
-voici le code actuellement : 'import pygame 
+import pygame
 import random
 import os
 
@@ -261,6 +256,4 @@ class Game:
         pygame.quit()
 
 if __name__ == "__main__":
-    Game().run()'
-
-réécrire le code en intégralité 
+    Game().run()
