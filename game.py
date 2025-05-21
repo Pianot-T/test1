@@ -78,7 +78,8 @@ class Player(pygame.sprite.Sprite):
         # Vertical movement
         self.rect.y += dy
         self.on_ground = False
-        if self.rect.bottom >= GROUND_Y:
+        # Only collide with the ground if the player is within the world width
+        if 0 <= self.rect.centerx <= WORLD_WIDTH and self.rect.bottom >= GROUND_Y:
             self.rect.bottom = GROUND_Y
             self.vel_y = 0
             self.on_ground = True
