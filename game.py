@@ -1,5 +1,6 @@
 import pygame
 import random
+import os
 
 # Screen dimensions
 WIDTH, HEIGHT = 800, 600
@@ -40,14 +41,19 @@ PLATFORM_HEIGHT = 20
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((PLAYER_WIDTH, PLAYER_HEIGHT))
-        self.image.fill(GREEN)
-        # draw a simple face as a placeholder texture
-        eye = pygame.Surface((8, 8))
-        eye.fill(WHITE)
-        self.image.blit(eye, (10, 15))
-        self.image.blit(eye, (PLAYER_WIDTH - 18, 15))
-        pygame.draw.rect(self.image, BLACK, (8, PLAYER_HEIGHT - 15, PLAYER_WIDTH - 16, 5))
+        if os.path.exists("player_skin.png"):
+            img = pygame.image.load("player_skin.png").convert_alpha()
+            img = pygame.transform.scale(img, (PLAYER_WIDTH, PLAYER_HEIGHT))
+            self.image = img
+        else:
+            self.image = pygame.Surface((PLAYER_WIDTH, PLAYER_HEIGHT))
+            self.image.fill(GREEN)
+            # draw a simple face as a placeholder texture
+            eye = pygame.Surface((8, 8))
+            eye.fill(WHITE)
+            self.image.blit(eye, (10, 15))
+            self.image.blit(eye, (PLAYER_WIDTH - 18, 15))
+            pygame.draw.rect(self.image, BLACK, (8, PLAYER_HEIGHT - 15, PLAYER_WIDTH - 16, 5))
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH // 2
         # start the player on the ground
