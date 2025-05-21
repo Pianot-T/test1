@@ -20,8 +20,9 @@ SKY_TOP = (135, 206, 250)
 SKY_BOTTOM = (0, 120, 255)
 
 # Player settings
-PLAYER_WIDTH = 40
-PLAYER_HEIGHT = 60
+# Scale the player sprite to appear larger in game
+PLAYER_WIDTH = 40 * 4
+PLAYER_HEIGHT = 60 * 4
 PLAYER_SPEED = 5
 JUMP_POWER = 15
 GRAVITY = 1
@@ -49,11 +50,11 @@ class Player(pygame.sprite.Sprite):
             self.image = pygame.Surface((PLAYER_WIDTH, PLAYER_HEIGHT))
             self.image.fill(GREEN)
             # draw a simple face as a placeholder texture
-            eye = pygame.Surface((8, 8))
+            eye = pygame.Surface((32, 32))
             eye.fill(WHITE)
-            self.image.blit(eye, (10, 15))
-            self.image.blit(eye, (PLAYER_WIDTH - 18, 15))
-            pygame.draw.rect(self.image, BLACK, (8, PLAYER_HEIGHT - 15, PLAYER_WIDTH - 16, 5))
+            self.image.blit(eye, (40, 60))
+            self.image.blit(eye, (PLAYER_WIDTH - 72, 60))
+            pygame.draw.rect(self.image, BLACK, (32, PLAYER_HEIGHT - 60, PLAYER_WIDTH - 64, 20))
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH // 2
         # start the player on the ground

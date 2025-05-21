@@ -1,7 +1,7 @@
 import pygame
 import os
 
-CELL_SIZE = 4
+CELL_SIZE = 16  # enlarge each cell for a bigger window
 GRID_WIDTH = 40
 GRID_HEIGHT = 60
 WIDTH = CELL_SIZE * GRID_WIDTH
