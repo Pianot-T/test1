@@ -6,6 +6,9 @@ WIDTH, HEIGHT = 800, 600
 WORLD_WIDTH = 1600
 FPS = 60
 
+# Y coordinate of the top of the ground platform
+GROUND_Y = HEIGHT - 40
+
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -43,7 +46,8 @@ class Player(pygame.sprite.Sprite):
         pygame.draw.rect(self.image, BLACK, (8, PLAYER_HEIGHT - 15, PLAYER_WIDTH - 16, 5))
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH // 2
-        self.rect.bottom = HEIGHT - 50
+        # start the player on the ground
+        self.rect.bottom = GROUND_Y
         self.vel_y = 0
         self.health = 100
 
@@ -56,17 +60,17 @@ class Player(pygame.sprite.Sprite):
             self.rect.x += PLAYER_SPEED
 
         self.vel_y += GRAVITY
-        if keys_pressed[pygame.K_SPACE] and self.rect.bottom >= HEIGHT - 50:
+        if keys_pressed[pygame.K_SPACE] and self.rect.bottom >= GROUND_Y:
             self.vel_y = -JUMP_POWER
 
         self.rect.y += self.vel_y
 
-        if self.rect.bottom >= HEIGHT - 50:
-            self.rect.bottom = HEIGHT - 50
+        if self.rect.bottom >= GROUND_Y:
+            self.rect.bottom = GROUND_Y
             self.vel_y = 0
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y=GROUND_Y):
         super().__init__()
         self.image = pygame.Surface((ENEMY_WIDTH, ENEMY_HEIGHT))
         self.image.fill(RED)
@@ -78,6 +82,7 @@ class Enemy(pygame.sprite.Sprite):
         pygame.draw.rect(self.image, BLACK, (5, ENEMY_HEIGHT - 15, ENEMY_WIDTH - 10, 5))
         self.rect = self.image.get_rect()
         self.rect.x = x
+        # ensure the enemy sits on the ground
         self.rect.bottom = y
         self.direction = 1
 
@@ -125,7 +130,7 @@ class Game:
         self.camera_x = 0
         self.all_sprites.add(self.player)
         # create one enemy and one coin for demonstration
-        enemy = Enemy(random.randint(100, WORLD_WIDTH - 100), HEIGHT - 50)
+        enemy = Enemy(random.randint(100, WORLD_WIDTH - 100), GROUND_Y)
         self.all_sprites.add(enemy)
         self.enemies.add(enemy)
         coin = Coin(random.randint(50, WORLD_WIDTH - 50), HEIGHT - 100)
@@ -195,7 +200,9 @@ class Game:
             self.draw_health_bar(10, 10, self.player.health)
             self.draw_text(f"Score: {self.score}", WIDTH - 80, 20)
             # ground
-            pygame.draw.rect(self.screen, WHITE, (-self.camera_x, HEIGHT - 40, WORLD_WIDTH, 40))
+            pygame.draw.rect(
+                self.screen, WHITE, (-self.camera_x, GROUND_Y, WORLD_WIDTH, HEIGHT - GROUND_Y)
+            )
             pygame.display.flip()
             self.clock.tick(FPS)
 
