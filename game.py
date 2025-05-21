@@ -26,6 +26,9 @@ PLAYER_SPEED = 5
 JUMP_POWER = 15
 GRAVITY = 1
 
+# file storing custom player skin
+SKIN_FILE = "player_skin.png"
+
 # Enemy settings
 ENEMY_WIDTH = 40
 ENEMY_HEIGHT = 60
@@ -41,8 +44,8 @@ PLATFORM_HEIGHT = 20
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        if os.path.exists("player_skin.png"):
-            img = pygame.image.load("player_skin.png").convert_alpha()
+        if os.path.exists(SKIN_FILE):
+            img = pygame.image.load(SKIN_FILE).convert_alpha()
             img = pygame.transform.scale(img, (PLAYER_WIDTH, PLAYER_HEIGHT))
             self.image = img
         else:
