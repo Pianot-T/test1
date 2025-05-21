@@ -37,3 +37,14 @@ Controls:
 - **Space**: jump
 - **Esc**: return to menu or quit
 - **Enter**: start game from menu
+
+## Custom Player Skin
+
+You can create your own player appearance using `editeur.py`. Run the editor and
+draw a 32x32 pixel skin with the palette provided. Press `S` to save your skin
+to `player_skin.png`. When you start the game again, this image will be loaded
+and used for the player sprite.
+
+```bash
+python3 editeur.py
+```
