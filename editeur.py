@@ -5,7 +5,8 @@ CELL_SIZE = 20
 GRID_SIZE = 32
 WIDTH = CELL_SIZE * GRID_SIZE
 PALETTE_SIZE = 40
-HEIGHT = WIDTH + PALETTE_SIZE
+BUTTON_HEIGHT = 40
+HEIGHT = WIDTH + PALETTE_SIZE + BUTTON_HEIGHT
 
 PALETTE_COLORS = [
     (0, 0, 0),
@@ -35,9 +36,11 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Editeur de Skin")
+    font = pygame.font.SysFont(None, 24)
 
     grid = load_existing_skin()
     selected_color = PALETTE_COLORS[3]  # green
+    save_button = pygame.Rect(WIDTH // 2 - 60, WIDTH + PALETTE_SIZE + 5, 120, BUTTON_HEIGHT - 10)
 
     running = True
     while running:
@@ -62,7 +65,7 @@ def main():
                     gy = my // CELL_SIZE
                     if 0 <= gx < GRID_SIZE and 0 <= gy < GRID_SIZE:
                         grid[gy][gx] = selected_color
-                else:
+                elif my < WIDTH + PALETTE_SIZE:
                     # palette selection
                     palette_width = PALETTE_SIZE * len(PALETTE_COLORS)
                     start_x = (WIDTH - palette_width) // 2
@@ -70,6 +73,14 @@ def main():
                         index = (mx - start_x) // PALETTE_SIZE
                         if 0 <= index < len(PALETTE_COLORS):
                             selected_color = PALETTE_COLORS[index]
+                else:
+                    if save_button.collidepoint(mx, my):
+                        surface = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
+                        for y in range(GRID_SIZE):
+                            for x in range(GRID_SIZE):
+                                surface.set_at((x, y), grid[y][x])
+                        pygame.image.save(surface, "player_skin.png")
+                        print("Skin sauvegarde dans player_skin.png")
 
         # draw grid
         for y in range(GRID_SIZE):
@@ -86,6 +97,12 @@ def main():
             pygame.draw.rect(screen, (50, 50, 50), rect, 1)
             if color == selected_color:
                 pygame.draw.rect(screen, (255, 255, 255), rect, 3)
+
+        # draw save button
+        pygame.draw.rect(screen, (180, 180, 180), save_button)
+        pygame.draw.rect(screen, (50, 50, 50), save_button, 1)
+        text = font.render("Sauvegarder", True, (0, 0, 0))
+        screen.blit(text, text.get_rect(center=save_button.center))
 
         pygame.display.flip()
 
