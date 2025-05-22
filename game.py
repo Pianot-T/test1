@@ -77,18 +77,10 @@ class Player(pygame.sprite.Sprite):
                 elif dx < 0:
                     self.rect.left = platform.rect.right
 
-        # Keep the player within world bounds horizontally to avoid sudden
-        # "teleportation" when falling off the sides of the world.
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > WORLD_WIDTH:
-            self.rect.right = WORLD_WIDTH
-
         # Vertical movement
         self.rect.y += dy
         self.on_ground = False
-        # Only collide with the ground if the player is within the world width
-        if 0 <= self.rect.centerx <= WORLD_WIDTH and self.rect.bottom >= GROUND_Y:
+        if self.rect.bottom >= GROUND_Y:
             self.rect.bottom = GROUND_Y
             self.vel_y = 0
             self.on_ground = True
