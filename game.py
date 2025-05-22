@@ -97,6 +97,17 @@ class Player(pygame.sprite.Sprite):
                     self.rect.top = platform.rect.bottom
                     self.vel_y = 0
 
+        # Check again for horizontal collisions in case vertical movement
+        # pushed the player inside a platform. This prevents the player from
+        # moving through a platform's side when jumping or falling while
+        # touching it.
+        for platform in platforms:
+            if self.rect.colliderect(platform.rect):
+                if dx > 0:
+                    self.rect.right = platform.rect.left
+                elif dx < 0:
+                    self.rect.left = platform.rect.right
+
     def update(self, keys_pressed=None, platforms=None):
         if keys_pressed is None:
             keys_pressed = pygame.key.get_pressed()
