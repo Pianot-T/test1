@@ -68,9 +68,15 @@ class Player(pygame.sprite.Sprite):
 
     def move(self, dx, dy, platforms):
         """Move the player and resolve collisions."""
-        # Horizontal movement. Platforms are ignored so the player can pass
-        # through them without collisions.
+        # Horizontal movement. Stop the player if they hit a platform so they
+        # can't pass through its sides.
         self.rect.x += dx
+        for platform in platforms:
+            if self.rect.colliderect(platform.rect):
+                if dx > 0:
+                    self.rect.right = platform.rect.left
+                elif dx < 0:
+                    self.rect.left = platform.rect.right
 
         # Vertical movement. The player only collides with the ground; platforms
         # are ignored to avoid creating an "invisible" collision surface.
@@ -84,7 +90,14 @@ class Player(pygame.sprite.Sprite):
             self.vel_y = 0
             self.on_ground = True
 
-        # No secondary collision check needed since platforms are ignored.
+        # Check again for horizontal collisions in case vertical movement pushed
+        # the player inside a platform while falling or jumping.
+        for platform in platforms:
+            if self.rect.colliderect(platform.rect):
+                if dx > 0:
+                    self.rect.right = platform.rect.left
+                elif dx < 0:
+                    self.rect.left = platform.rect.right
 
     def update(self, keys_pressed=None, platforms=None):
         if keys_pressed is None:
