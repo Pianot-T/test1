@@ -76,7 +76,10 @@ class Player(pygame.sprite.Sprite):
         # are ignored to avoid creating an "invisible" collision surface.
         self.rect.y += dy
         self.on_ground = False
-        if self.rect.bottom >= GROUND_Y:
+        if (
+            0 <= self.rect.centerx <= WORLD_WIDTH
+            and self.rect.bottom >= GROUND_Y
+        ):
             self.rect.bottom = GROUND_Y
             self.vel_y = 0
             self.on_ground = True
